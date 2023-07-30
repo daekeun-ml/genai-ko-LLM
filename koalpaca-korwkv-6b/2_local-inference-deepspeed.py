@@ -9,7 +9,10 @@ from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer, GPTNeoXL
 import torch.distributed as dist
 import torch.multiprocessing as mp
 
-local_model_path = "/home/ec2-user/SageMaker/hf_cache"
+HF_MODEL_ID = "beomi/KoAlpaca-KoRWKV-6B"
+model_name = HF_MODEL_ID.split("/")[-1].replace('.', '-')
+model_tar_dir = f"/home/ec2-user/SageMaker/models/{model_name}"
+
 os.environ["TOKENIZERS_PARALLELISM"] = "false"  # To avoid warnings about parallelism in tokenizers
 sys.path.append('../utils')
 sys.path.append('../templates')
@@ -59,14 +62,11 @@ if __name__ == "__main__":
     config = setup(backend="nccl")
     print(config)
 
-    model_id = "beomi/KoAlpaca-KoRWKV-6B"
-
     with deepspeed.OnDevice(dtype=torch.float16, device="cuda"):
         model = AutoModelForCausalLM.from_pretrained(
-            model_id,
+            model_tar_dir,
             torch_dtype=torch.float16,
             low_cpu_mem_usage=True,
-            cache_dir=local_model_path
         )
 
     ds_config = {
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     model = deepspeed.init_inference(model, ds_config)
 
     local_rank = int(os.getenv('LOCAL_RANK', '0'))
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    tokenizer = AutoTokenizer.from_pretrained(HF_MODEL_ID)
     generator = pipeline(
         task="text-generation", model=model, tokenizer=tokenizer, device=config.local_rank
     )
