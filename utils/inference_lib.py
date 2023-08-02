@@ -148,28 +148,25 @@ class KoLLMSageMakerEndpoint(object):
         self.smr_client  = boto3.client('sagemaker-runtime')
         
     def get_payload(self, instruction, input_text, params):
-        prompter = Prompter("kullm")
-        prompt = prompter.generate_prompt(instruction, input_text)
+        prompt = self.prompter.generate_prompt(instruction, input_text)
         payload = {
             'inputs': prompt,
             'parameters': params
         }
-        return payload
+        payload_str = json.dumps(payload)
+        return payload_str.encode("utf-8")
 
-    def infer(self, payload, verbose=True):
-        
-        content_type = "application/json"
+    def infer(self, payload, content_type="application/json", verbose=True):
         response = self.smr_client.invoke_endpoint(
             EndpointName=self.endpoint_name,
             ContentType=content_type,
-            Body=json.dumps(payload)
+            Body=payload
         )
 
-        #model_predictions = json.loads(response['Body'].read().decode())
-        #s = model_predictions[0]['generated_text']
-        #generated_text = self.prompter.get_response(s)
-        res = response["Body"].read().decode()
-        generated_text = parse_response(res)
+        res = json.loads(response['Body'].read().decode("utf-8"))
+        generated_text = res[0]["generated_text"]
+        #generated_text = self.prompter.get_response(generated_text)
+
         generated_text = generated_text.split('###')[0]
         if verbose:
             pprint.pprint(f'Response: {generated_text}')
