@@ -16,9 +16,9 @@ declare -a OPTS=(
     --chkpt_dir chkpt
     --save_path ./model
     --batch_size 2
-    --gradient_accumulation_steps 8
+    --gradient_accumulation_steps 2
     --num_epochs 1
-    --learning_rate 1e-4
+    --learning_rate 3e-4
     --lora_r 8
     --lora_alpha 16
     --lora_dropout 0.05
@@ -29,7 +29,7 @@ declare -a OPTS=(
     --weight_decay 0.
     --warmup_steps 50
     --warmup_ratio 0.03
-    --lr_scheduler_type "cosine"
+    --lr_scheduler_type "constant"
     --wandb_project "sagemaker-training"
     --wandb_run_name "qlora-"$TIMESTAMP
     --wandb_watch "false"        
