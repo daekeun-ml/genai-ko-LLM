@@ -247,10 +247,12 @@ def train(args):
     )
     model.config.use_cache = False
 
-    old_state_dict = model.state_dict
-    model.state_dict = (lambda self, *_, **__: get_peft_model_state_dict(self, old_state_dict())).__get__(
-        model, type(model)
-    )
+    ## PEFT 구 버전에서 443byte로 저장되는 문제가 있음. 최신 버전에서는 해결되었지만, 일부 훈련 코드에서 아래 코드가 들어간 경우 여전히 443bytes로 저장되므로 주의 필요
+    ## Reference: https://github.com/huggingface/peft/issues/286
+    # old_state_dict = model.state_dict
+    # model.state_dict = (lambda self, *_, **__: get_peft_model_state_dict(self, old_state_dict())).__get__(
+    #     model, type(model)
+    # )
 
     if torch.__version__ >= "2" and sys.platform != "win32":
         model = torch.compile(model)
