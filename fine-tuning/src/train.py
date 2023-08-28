@@ -30,8 +30,7 @@ def parse_args():
     parser.add_argument("--output_dir", type=str, default="./lora-alpaca")
     parser.add_argument("--save_path", type=str, default="./model")
     parser.add_argument("--save_merged_model", type=bool, default=False)
-    parser.add_argument("--chkpt_dir", type=str, default=None, help="either training checkpoint or final adapter")    
-        
+
     # add training hyperparameters for epochs, batch size, learning rate, and seed
     parser.add_argument("--batch_size", type=int, default=1, help="Batch size to use for training.")
     parser.add_argument("--num_epochs", type=int, default=1)
@@ -69,13 +68,6 @@ def parse_args():
     return args
 
 
-def _save_chkpt(resume_from_checkpoint, trainer):
-    if int(os.environ.get("LOCAL_RANK", 0)) == 0:
-        os.makedirs(resume_from_checkpoint, exist_ok=True)
-        print("Saving the Checkpoint: {}".format(resume_from_checkpoint))
-        trainer.model.save_pretrained(resume_from_checkpoint)
-
-
 def train(args):
     base_model = args.base_model
     cache_dir = args.cache_dir
@@ -83,8 +75,7 @@ def train(args):
     data_path = args.data_path
     output_dir = args.output_dir
     save_path = args.save_path
-    save_merged_model = args.save_merged_model
-    chkpt_dir = args.chkpt_dir    
+    save_merged_model = args.save_merged_model  
     batch_size = args.batch_size
     num_epochs = args.num_epochs
     learning_rate = args.learning_rate
@@ -113,7 +104,6 @@ def train(args):
             f"output_dir: {output_dir}\n"
             f"save_path: {save_path}\n"
             f"save_merged_model: {save_merged_model}\n"
-            f"chkpt_dir: {chkpt_dir}\n"
             f"batch_size: {batch_size}\n"
             f"num_epochs: {num_epochs}\n"
             f"learning_rate: {learning_rate}\n"
@@ -132,8 +122,8 @@ def train(args):
             f"eval_steps: {eval_steps}\n"            
         )
     assert base_model, "Please specify a --base_model, e.g. --base_model='huggyllama/llama-7b'"
-    
-    os.makedirs(chkpt_dir, exist_ok=True)      
+ 
+    os.makedirs(output_dir, exist_ok=True)
     device_map = "auto"
     world_size = int(os.environ.get("WORLD_SIZE", 1))
     print(f"world_size: {world_size}")
@@ -145,7 +135,9 @@ def train(args):
         #gradient_accumulation_steps = gradient_accumulation_steps // world_size
 
     # Check if parameter passed or if set within environ
-    use_wandb = len(wandb_project) > 0 or ("WANDB_PROJECT" in os.environ and len(os.environ["WANDB_PROJECT"]) > 0)
+    #use_wandb = len(wandb_project) > 0 or ("WANDB_PROJECT" in os.environ and len(os.environ["WANDB_PROJECT"]) > 0)
+    use_wandb = len(wandb_project) > 0
+    
     # Only overwrite environ if wandb param passed
     if len(wandb_project) > 0:
         os.environ["WANDB_PROJECT"] = wandb_project
@@ -197,8 +189,8 @@ def train(args):
     #     data = load_dataset(data_path)
 
     # Check if checkpoints exists
-    if len(os.listdir(chkpt_dir)) > 0:
-        last_checkpoint = transformers.trainer_utils.get_last_checkpoint(chkpt_dir)
+    if len(os.listdir(output_dir)) > 0:
+        last_checkpoint = transformers.trainer_utils.get_last_checkpoint(output_dir)
 
         # Check the available weights and load them
         checkpoint_name = os.path.join(last_checkpoint, "pytorch_model.bin")  # Full checkpoint

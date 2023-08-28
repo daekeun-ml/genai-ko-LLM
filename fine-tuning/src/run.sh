@@ -11,7 +11,7 @@ declare -a OPTS=(
     --pretrained_model_path /opt/ml/input/data/pretrained/
     --cache_dir $HF_DATASETS_CACHE
     --data_path /opt/ml/input/data/training/
-    --output_dir output
+    --output_dir /opt/ml/checkpoints
     --save_path /opt/ml/model/
     --batch_size 2
     --num_epochs 1
