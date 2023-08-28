@@ -5,14 +5,16 @@ pip install -r requirements.txt
 
 mkdir -p /tmp/huggingface-cache/
 export HF_DATASETS_CACHE="/tmp/huggingface-cache"
+TIMESTAMP=$(date +"%Y-%m-%d-%T")
 
 declare -a OPTS=(
     --base_model nlpai-lab/kullm-polyglot-12.8b-v2
-    --pretrained_model_path /opt/ml/input/data/pretrained/
+    --pretrained_model_path /home/ec2-user/SageMaker/models/kullm-polyglot-12-8b-v2/
     --cache_dir $HF_DATASETS_CACHE
-    --data_path /opt/ml/input/data/training/
+    --data_path ../chunk-train
     --output_dir output
-    --save_path /opt/ml/model/
+    --chkpt_dir chkpt
+    --save_path ./model
     --batch_size 2
     --num_epochs 1
     --learning_rate 3e-5
@@ -21,19 +23,24 @@ declare -a OPTS=(
     --lora_dropout 0.05
     --lora_target_modules "[query_key_value, xxx]"
     --logging_steps 1
-    --save_steps 40
+    --save_steps 1    
     --eval_steps 40
     --weight_decay 0.
     --warmup_steps 0
     --warmup_ratio 0.1
     --lr_scheduler_type "cosine"
+    --wandb_project "sagemaker-training"
+    --wandb_run_name "qlora-"$TIMESTAMP
+    --wandb_watch "all"        
 )
 
-if [ $SM_NUM_GPUS -eq 1 ]
+NUM_GPUS=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
+
+if [ $NUM_GPUS -eq 1 ]
 then
     echo python train.py "${OPTS[@]}" "$@"
     CUDA_VISIBLE_DEVICES=0 python train.py "${OPTS[@]}" "$@"
 else
-    echo torchrun --nnodes 1 --nproc_per_node "$SM_NUM_GPUS" train.py "${OPTS[@]}" "$@"
-    torchrun --nnodes 1 --nproc_per_node "$SM_NUM_GPUS" train.py "${OPTS[@]}" "$@"
+    echo torchrun --nnodes 1 --nproc_per_node "$NUM_GPUS" train.py "${OPTS[@]}" "$@"
+    torchrun --nnodes 1 --nproc_per_node "$NUM_GPUS" train.py "${OPTS[@]}" "$@"
 fi

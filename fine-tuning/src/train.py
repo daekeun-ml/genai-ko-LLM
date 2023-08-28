@@ -30,6 +30,7 @@ def parse_args():
     parser.add_argument("--output_dir", type=str, default="./lora-alpaca")
     parser.add_argument("--save_path", type=str, default="./model")
     parser.add_argument("--save_merged_model", type=bool, default=False)
+    parser.add_argument("--chkpt_dir", type=str, default=None, help="either training checkpoint or final adapter")    
         
     # add training hyperparameters for epochs, batch size, learning rate, and seed
     parser.add_argument("--batch_size", type=int, default=1, help="Batch size to use for training.")
@@ -55,7 +56,8 @@ def parse_args():
     parser.add_argument("--wandb_watch", type=str, default="") # options: false | gradients | all
     parser.add_argument("--wandb_log_model", type=str, default="") # options: false | true
     
-    parser.add_argument("--resume_from_checkpoint", type=str, default=None, help="either training checkpoint or final adapter")
+    parser.add_argument("--save_steps", type=int, default=200)
+    parser.add_argument("--eval_steps", type=int, default=200)
     
     parser.add_argument(
         "--bf16",
@@ -67,14 +69,22 @@ def parse_args():
     return args
 
 
+def _save_chkpt(resume_from_checkpoint, trainer):
+    if int(os.environ.get("LOCAL_RANK", 0)) == 0:
+        os.makedirs(resume_from_checkpoint, exist_ok=True)
+        print("Saving the Checkpoint: {}".format(resume_from_checkpoint))
+        trainer.model.save_pretrained(resume_from_checkpoint)
+
+
 def train(args):
     base_model = args.base_model
     cache_dir = args.cache_dir
     pretrained_model_path = args.pretrained_model_path
     data_path = args.data_path
     output_dir = args.output_dir
-    save_path = args.save_path    
-    save_merged_model = args.save_merged_model 
+    save_path = args.save_path
+    save_merged_model = args.save_merged_model
+    chkpt_dir = args.chkpt_dir    
     batch_size = args.batch_size
     num_epochs = args.num_epochs
     learning_rate = args.learning_rate
@@ -89,8 +99,9 @@ def train(args):
     wandb_run_name = args.wandb_run_name
     wandb_watch = args.wandb_watch
     wandb_log_model = args.wandb_log_model
-    resume_from_checkpoint = args.resume_from_checkpoint
-    bf16b = args.bf16
+    save_steps = args.save_steps
+    eval_steps = args.eval_steps
+    bf16 = args.bf16
     
     if int(os.environ.get("LOCAL_RANK", 0)) == 0:
         print(
@@ -101,7 +112,8 @@ def train(args):
             f"data_path: {data_path}\n"
             f"output_dir: {output_dir}\n"
             f"save_path: {save_path}\n"
-            f"save_merged_model: {save_merged_model}\n"            
+            f"save_merged_model: {save_merged_model}\n"
+            f"chkpt_dir: {chkpt_dir}\n"
             f"batch_size: {batch_size}\n"
             f"num_epochs: {num_epochs}\n"
             f"learning_rate: {learning_rate}\n"
@@ -116,10 +128,12 @@ def train(args):
             f"wandb_run_name: {wandb_run_name}\n"
             f"wandb_watch: {wandb_watch}\n"
             f"wandb_log_model: {wandb_log_model}\n"
-            f"resume_from_checkpoint: {resume_from_checkpoint or False}\n"
+            f"save_steps: {save_steps}\n"
+            f"eval_steps: {eval_steps}\n"            
         )
     assert base_model, "Please specify a --base_model, e.g. --base_model='huggyllama/llama-7b'"
-
+    
+    os.makedirs(chkpt_dir, exist_ok=True)      
     device_map = "auto"
     world_size = int(os.environ.get("WORLD_SIZE", 1))
     print(f"world_size: {world_size}")
@@ -163,7 +177,7 @@ def train(args):
         cache_dir=cache_dir,
         quantization_config=nf4_config, 
     )
-    
+
     model = prepare_model_for_kbit_training(model)
 
     config = LoraConfig(
@@ -182,14 +196,17 @@ def train(args):
     # else:
     #     data = load_dataset(data_path)
 
-    if resume_from_checkpoint:
+    # Check if checkpoints exists
+    if len(os.listdir(chkpt_dir)) > 0:
+        last_checkpoint = transformers.trainer_utils.get_last_checkpoint(chkpt_dir)
+
         # Check the available weights and load them
-        checkpoint_name = os.path.join(resume_from_checkpoint, "pytorch_model.bin")  # Full checkpoint
+        checkpoint_name = os.path.join(last_checkpoint, "pytorch_model.bin")  # Full checkpoint
         if not os.path.exists(checkpoint_name):
             checkpoint_name = os.path.join(
-                resume_from_checkpoint, "adapter_model.bin"
+                last_checkpoint, "adapter_model.bin"
             )  # only LoRA model - LoRA config above has to fit
-            resume_from_checkpoint = False  # So the trainer won't try loading its state
+
         # The two files above have a different name depending on how they were saved, but are actually the same.
         if os.path.exists(checkpoint_name):
             print(f"Restarting from {checkpoint_name}")
@@ -226,13 +243,13 @@ def train(args):
             warmup_steps=100,
             num_train_epochs=num_epochs,
             learning_rate=learning_rate,
-            bf16=args.bf16,  # Use BF16 if available
+            bf16=bf16,  # Use BF16 if available
             logging_steps=1,
             optim="paged_adamw_8bit",
             evaluation_strategy="steps" if val_set_size > 0 else "no",
             save_strategy="steps",
-            eval_steps=200 if val_set_size > 0 else None,
-            save_steps=200,
+            save_steps=save_steps,
+            eval_steps=eval_steps if val_set_size > 0 else None,
             output_dir=output_dir,
             save_total_limit=3,
             load_best_model_at_end=True if val_set_size > 0 else False,
@@ -257,7 +274,7 @@ def train(args):
     if torch.__version__ >= "2" and sys.platform != "win32":
         model = torch.compile(model)
 
-    trainer.train(resume_from_checkpoint=resume_from_checkpoint)
+    trainer.train()
 
     # Save Model
     if int(os.environ.get("LOCAL_RANK", 0)) == 0:
@@ -273,7 +290,7 @@ def train(args):
             merged_model = model.merge_and_unload()
             merged_model.save_pretrained(save_path, safe_serialization=True)
         else:
-            print(f'Save LoRA model: {output_dir}') 
+            print(f'Save LoRA model: {save_path}') 
             trainer.model.save_pretrained(save_path)
 
         tokenizer.save_pretrained(save_path)        

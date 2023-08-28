@@ -5,6 +5,7 @@ pip install -r requirements.txt
 
 mkdir -p /tmp/huggingface-cache/
 export HF_DATASETS_CACHE="/tmp/huggingface-cache"
+TIMESTAMP=$(date +"%Y-%m-%d-%T")
 
 declare -a OPTS=(
     --base_model nlpai-lab/kullm-polyglot-12.8b-v2
@@ -27,6 +28,9 @@ declare -a OPTS=(
     --warmup_steps 0
     --warmup_ratio 0.1
     --lr_scheduler_type "cosine"
+    --wandb_project "sagemaker-training"
+    --wandb_run_name "qlora-"$TIMESTAMP
+    --wandb_watch "all"    
 )
 
 if [ $SM_NUM_GPUS -eq 1 ]
@@ -37,3 +41,5 @@ else
     echo torchrun --nnodes 1 --nproc_per_node "$SM_NUM_GPUS" train.py "${OPTS[@]}" "$@"
     torchrun --nnodes 1 --nproc_per_node "$SM_NUM_GPUS" train.py "${OPTS[@]}" "$@"
 fi
+
+
