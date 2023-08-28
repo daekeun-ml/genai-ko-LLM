@@ -15,7 +15,7 @@ declare -a OPTS=(
     --save_path /opt/ml/model/
     --batch_size 2
     --num_epochs 1
-    --learning_rate 3e-5
+    --learning_rate 1e-5
     --lora_r 8 \
     --lora_alpha 32
     --lora_dropout 0.05

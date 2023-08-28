@@ -34,7 +34,7 @@ def parse_args():
     # add training hyperparameters for epochs, batch size, learning rate, and seed
     parser.add_argument("--batch_size", type=int, default=1, help="Batch size to use for training.")
     parser.add_argument("--num_epochs", type=int, default=1)
-    parser.add_argument("--learning_rate", type=float, default=3e-4, help="Learning rate to use for training.")
+    parser.add_argument("--learning_rate", type=float, default=2e-5, help="Learning rate to use for training.")
     parser.add_argument("--gradient_accumulation_steps", type=int, default=2)
     
     # quantization parameters
@@ -135,8 +135,8 @@ def train(args):
         #gradient_accumulation_steps = gradient_accumulation_steps // world_size
 
     # Check if parameter passed or if set within environ
-    #use_wandb = len(wandb_project) > 0 or ("WANDB_PROJECT" in os.environ and len(os.environ["WANDB_PROJECT"]) > 0)
-    use_wandb = len(wandb_project) > 0
+    use_wandb = len(wandb_project) > 0 or ("WANDB_PROJECT" in os.environ and len(os.environ["WANDB_PROJECT"]) > 0)
+    #use_wandb = len(wandb_project) > 0
     
     # Only overwrite environ if wandb param passed
     if len(wandb_project) > 0:
@@ -247,7 +247,7 @@ def train(args):
             load_best_model_at_end=True if val_set_size > 0 else False,
             ddp_find_unused_parameters=False if ddp else None,
             group_by_length=group_by_length,
-            report_to="wandb" if use_wandb else None,
+            report_to="wandb" if use_wandb else "none",
             run_name=wandb_run_name if use_wandb else None,
         ),
         data_collator=transformers.DataCollatorForSeq2Seq(
