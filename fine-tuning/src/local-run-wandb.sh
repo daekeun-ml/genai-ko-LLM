@@ -16,22 +16,23 @@ declare -a OPTS=(
     --chkpt_dir chkpt
     --save_path ./model
     --batch_size 2
+    --gradient_accumulation_steps 8
     --num_epochs 1
-    --learning_rate 1e-5
-    --lora_r 8 \
-    --lora_alpha 32
+    --learning_rate 1e-4
+    --lora_r 8
+    --lora_alpha 16
     --lora_dropout 0.05
     --lora_target_modules "[query_key_value, xxx]"
     --logging_steps 1
-    --save_steps 1    
+    --save_steps 40
     --eval_steps 40
     --weight_decay 0.
-    --warmup_steps 0
-    --warmup_ratio 0.1
+    --warmup_steps 50
+    --warmup_ratio 0.03
     --lr_scheduler_type "cosine"
     --wandb_project "sagemaker-training"
     --wandb_run_name "qlora-"$TIMESTAMP
-    --wandb_watch "all"        
+    --wandb_watch "false"        
 )
 
 NUM_GPUS=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
