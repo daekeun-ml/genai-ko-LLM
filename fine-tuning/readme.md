@@ -16,7 +16,7 @@
 - **양자화(Quantization)**: 입력 데이터를 더 적은 정보를 가진 표현으로 변환하는 과정입니다. 일반적으로 더 많은 비트를 가진 데이터 타입을 더 적은 비트로 변환합니다. 예를 들어, 32-bit 부동소수점을 4-bit 정수로 변환할 수 있습니다.
   
   <div align="center">
-    <img src="../images/quantization.png" alt="image 2" width="600" height="300">
+    <img src="../images/quantization.png" alt="image 1" width="600" height="300">
   </div>
 
 #### 기본 방법
@@ -26,7 +26,7 @@
 - For example, quantizing a 32-bit Floating Point (FP32) tensor into a Int8 tensor with range [−127, 127]:
   
   <div align="center">
-    <img src="../images/qlora_quantization.png" alt="image 2">
+    <img src="../images/qlora_quantization.png" alt="image 2" width="600">
   </div>
 
 #### 문제점
@@ -43,7 +43,7 @@
 
 **Low-rank Adapters (LoRA)**는 파인튜닝(finetuning) 과정에서 메모리 요구 사항을 줄이기 위한 방법입니다. 이 방법은 작은 수의 훈련 가능한 매개변수, 즉 어댑터를 사용하면서 전체 모델 매개변수는 고정된 상태로 둡니다. 
   <div align="center">
-    <img src="../images/lora.png" alt="image 2" width="600" >
+    <img src="../images/lora.png" alt="image 3" width="600" >
   </div>
 
 #### 작동 원리
@@ -80,7 +80,7 @@ Y = XW + sXL_1 L_2,
 
 ## 3. QLORA Finetuning의 핵심 3가지
   <div align="center">
-    <img src="../images/qlora_fig1.png" alt="image 2" width="600" >
+    <img src="../images/qlora_fig1.png" alt="image 4" width="600" >
   </div>
 
 ### 3-a. 4-bit NormalFloat 양자화
