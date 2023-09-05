@@ -27,7 +27,7 @@
 - For example, quantizing a 32-bit Floating Point (FP32) tensor into a Int8 tensor with range [−127, 127]
 
   <div align="center">
-    <img src="../images/qlora_quantization_eq1.png" alt="image 2" width="600">
+    <img src="../images/qlora_quantization_eq.png" alt="image 2" width="600">
   </div>
 
 #### 문제점
