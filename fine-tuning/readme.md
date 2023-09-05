@@ -55,9 +55,7 @@
 
 LoRA는 선형 투영(linear projection)을 추가적인 팩터화된 투영(factorized projection)으로 확장합니다. 주어진 투영 $XW = Y$이 있을 때, $\( X \in R^{b \times h}$, $W \in R^{h \times o} \)$, LoRA는 다음과 같이 계산됩니다:
 
-$\
-Y = XW + sXL_1 L_2,
-\$
+$$Y = XW + sXL_1 L_2 ,$$
 
 여기서 $\( L_1 \in R^{h \times r} \)$와 $\( L_2 \in R^{r \times o} \)$이고, $\( s \)$는 스칼라입니다.
 
