@@ -16,8 +16,9 @@
 - **양자화(Quantization)**: 입력 데이터를 더 적은 정보를 가진 표현으로 변환하는 과정입니다. 일반적으로 더 많은 비트를 가진 데이터 타입을 더 적은 비트로 변환합니다. 예를 들어, 32-bit 부동소수점을 4-bit 정수로 변환할 수 있습니다.
   
 <div align="center">
- <img src="../images/quantization.png" alt="image 1" width="600" height="300">
+ <img src="../images/quantization.png" alt="image 1" width="600" height="200">
 </div>
+[What is Quantization in the signal?](https://www.differencebetween.com/difference-between-uniform-and-nonuniform-quantization/)
 
 #### 기본 방법
 
@@ -83,6 +84,8 @@ $$Y = XW + sXL_1 L_2 ,$$
   <div align="center">
     <img src="../images/qlora_fig1.png" alt="image 4" width="600" >
   </div>
+QLORA는 LoRA를 개선하기 위해 트랜스포머 모델을 4비트 정밀도로 양자화하고, 메모리 스파이크를 처리하기 위해 페이지드 옵티마이저를 사용합니다.
+이는 기본적으로 QLORA가 LoRA에 비해 메모리 사용량을 줄이면서도 성능을 유지하거나 향상시키는 방법을 제시한다는 것을 의미합니다. 4비트 정밀도로 모델을 양자화하면 메모리 사용량이 줄어들고, 페이지드 옵티마이저는 메모리 사용량이 급증하는 상황을 효과적으로 관리해줍니다.
 
 ### 3-a. 4-bit NormalFloat 양자화
 
@@ -166,6 +169,9 @@ LoRA (Low-rank Adapters)의 기본 하이퍼파라미터 설정은 16비트 설�
 ### 4-b. 4-bit NormalFloat은 4-bit Floating Point보다 더 나은 성능을 보임
 
 4비트 NormalFloat (NF4)가 표준 4비트 부동 소수점 (FP4)보다 어떤 실증적 이점이 있는지에 대해 논의합니다.
+<div align="center">
+ <img src="../images/Nfloat.png" alt="image 5" width="600" >
+</div>
 
 #### 주요 포인트
 
