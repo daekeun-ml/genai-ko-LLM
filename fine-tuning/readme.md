@@ -26,7 +26,7 @@
 - For example, quantizing a 32-bit Floating Point (FP32) tensor into a Int8 tensor with range [−127, 127]
 
   <div align="center">
-    <img src="../images/qlora_eq1.png" alt="image 2" width="600">
+    <img src="../images/lora.png" alt="image 3" width="600" >
   </div>
 
 
