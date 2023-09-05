@@ -23,7 +23,6 @@
 
 - **정규화(Normalization)**: 낮은 비트 데이터 타입의 전체 범위가 사용되도록 입력 데이터 타입은 대상 데이터 타입 범위로 정규화됩니다. 이는 입력 요소의 절대 최대값으로 정규화하여 이루어집니다.
 - **양자화 상수(Quantization Constant)**: 이는 양자화 과정에서 사용되며, 일반적으로 $c$로 표시됩니다.
-- For example, quantizing a 32-bit Floating Point (FP32) tensor into a Int8 tensor with range [−127, 127]
 
   <div align="center">
     <img src="../images/lora.png" alt="image 3" width="600" >
