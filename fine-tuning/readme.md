@@ -78,9 +78,8 @@ $$Y = XW + sXL_1 L_2 ,$$
 
 
 
-
-
 ## 3. QLORA Finetuning의 핵심 3가지
+> 참고: 이 정보는 QLORA의 효율성과 성능을 높이는 데 중요한 역할을 합니다.
   <div align="center">
     <img src="../images/qlora_fig1.png" alt="image 4" width="600" >
   </div>
@@ -121,7 +120,6 @@ Double Quantization은 기본적으로 양자화 상수 자체를 양자화하�
 #### 메모리 절약
 Double Quantization은 평균적으로 매개변수 당 약 0.37비트를 절약합니다. 이는 큰 모델, 특히 65B 모델에 대해 약 3GB의 메모리를 절약할 수 있습니다.
 
-> 참고: 이 정보는 QLORA의 효율성과 성능을 높이는 데 중요한 역할을 합니다.
 
 ### 3-c. Paged Optimizers
 
