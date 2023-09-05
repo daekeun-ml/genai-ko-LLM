@@ -25,6 +25,7 @@
 - **양자화 상수(Quantization Constant)**: 이는 양자화 과정에서 사용되며, 일반적으로 $c$로 표시됩니다.
 - For example, quantizing a 32-bit Floating Point (FP32) tensor into a Int8 tensor with range [−127, 127],
 
+
   <div align="center">
     <img src="../images/qlora_quantization.png" alt="image 2" width="600">
   </div>
