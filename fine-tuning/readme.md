@@ -27,7 +27,7 @@
 
 
   <div align="center">
-    <img src="../images/qlora_quantization.png" alt="image 2" width="600">
+    <img src="../images/qlora_quantization_eq1.png" alt="image 2" width="600">
   </div>
 
 
