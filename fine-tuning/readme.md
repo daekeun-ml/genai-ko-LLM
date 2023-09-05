@@ -17,8 +17,10 @@
   
 <div align="center">
  <img src="../images/quantization.png" alt="image 1" width="600" height="200">
+<br>
+  <a href="https://www.differencebetween.com/difference-between-uniform-and-nonuniform-quantization/">What is Quantization in the signal?</a>
 </div>
-[What is Quantization in the signal?](https://www.differencebetween.com/difference-between-uniform-and-nonuniform-quantization/)
+
 
 #### 기본 방법
 
