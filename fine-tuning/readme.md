@@ -29,7 +29,7 @@
 - For example, quantizing a 32-bit Floating Point (FP32) tensor into a Int8 tensor with range $[−127, 127]$
   
 <div align="center">
- <img src="../images/qlora_eq1.png" alt="image 2" width="600" >
+ <img src="../images/lora_eq1.png" alt="image 2" width="600" >
 </div>
 
 
@@ -136,6 +136,11 @@ Paged Optimizers는 NVIDIA의 통합 메모리를 사용하여 CPU와 GPU 사이
 
 #### 메모리 관리
 이 기술은 특히 33B/65B 크기의 QLORA 모델을 단일 24/48GB GPU에서 튜닝할 때 중요합니다. 긴 시퀀스 길이의 미니배치를 처리할 때만 페이징이 발생하기 때문에, 이는 드문 경우입니다.
+
+<div align="center">
+ <img src="../images/qlora_eq.png" alt="image 8" width="600" >
+</div>
+
 ##### 참조 
 - 그래디언트 체크포인팅(Gradient Checkpointing)
 
