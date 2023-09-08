@@ -31,12 +31,13 @@ def parse_args():
     parser.add_argument("--save_path", type=str, default="./model")
     parser.add_argument("--save_merged_model", type=bool, default=False)
 
-    # add training hyperparameters for epochs, batch size, learning rate, and seed
+    # add training hyperparameters
     parser.add_argument("--batch_size", type=int, default=1, help="Batch size to use for training.")
     parser.add_argument("--num_epochs", type=int, default=1)
     parser.add_argument("--learning_rate", type=float, default=2e-5, help="Learning rate to use for training.")
     parser.add_argument("--gradient_accumulation_steps", type=int, default=2)
-    
+    parser.add_argument("--lr_scheduler_type", type=str, default="linear")
+        
     # quantization parameters
     parser.add_argument("--quant_8bit", type=bool, default=False)
     parser.add_argument("--quant_4bit", type=bool, default=True)
@@ -80,6 +81,7 @@ def train(args):
     num_epochs = args.num_epochs
     learning_rate = args.learning_rate
     gradient_accumulation_steps = args.gradient_accumulation_steps
+    lr_scheduler_type = args.lr_scheduler_type
     quant_8bit = args.quant_8bit
     quant_4bit = args.quant_4bit
     lora_r = args.lora_r
@@ -108,6 +110,7 @@ def train(args):
             f"num_epochs: {num_epochs}\n"
             f"learning_rate: {learning_rate}\n"
             f"gradient_accumulation_steps: {gradient_accumulation_steps}\n"
+            f"lr_scheduler_type: {lr_scheduler_type}\n"
             f"quant_8bit: {quant_8bit}\n"
             f"quant_4bit: {quant_4bit}\n"
             f"lora_r: {lora_r}\n"
@@ -136,7 +139,6 @@ def train(args):
 
     # Check if parameter passed or if set within environ
     use_wandb = len(wandb_project) > 0 or ("WANDB_PROJECT" in os.environ and len(os.environ["WANDB_PROJECT"]) > 0)
-    #use_wandb = len(wandb_project) > 0
     
     # Only overwrite environ if wandb param passed
     if len(wandb_project) > 0:
@@ -238,6 +240,7 @@ def train(args):
             bf16=bf16,  # Use BF16 if available
             logging_steps=1,
             optim="paged_adamw_8bit",
+            lr_scheduler_type=lr_scheduler_type,
             evaluation_strategy="steps" if val_set_size > 0 else "no",
             save_strategy="steps",
             save_steps=save_steps,

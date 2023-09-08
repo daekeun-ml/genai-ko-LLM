@@ -28,7 +28,7 @@ declare -a OPTS=(
     --weight_decay 0.
     --warmup_steps 50
     --warmup_ratio 0.03
-    --lr_scheduler_type "constant"
+    --lr_scheduler_type "linear"
     --wandb_project "sagemaker-training"
     --wandb_run_name "qlora-"$TIMESTAMP
     --wandb_watch "false"    
